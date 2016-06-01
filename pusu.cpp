@@ -30,7 +30,6 @@ vector<int> findsimpath(Path* path)
 		candidate[cindex][i] = true;
 	}
 	Point* p = path->start;
-//	cout << "ok" <<endl;
 	while (p->next_point != NULL)
 	{
 		candidate[cindex ^ 1].clear();
