@@ -1,7 +1,7 @@
 #include <cmath> 
 #include <cstdlib>
 #define pi 3.14159265358979323846
-#define earthRadiusm 6371000.0
+#define earthRadiusm 6371.0
 
 using namespace std;
 

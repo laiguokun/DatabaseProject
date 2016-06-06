@@ -16,11 +16,11 @@ public:
     };
     Edge** edges;
     kdtree(Edge**, int);
-    void find(double xmin, double xmax, double ymin, double ymax);
+    void find(Node* node, double xmin, double xmax, double ymin, double ymax, int** kd_set, int* cnt);
     Node* root;
-    int* obj;
+    int* index;
     void buildtree(Node*);
-    void sort(int **obj,int l,int r,int k);
+    void sort(int **index,int l,int r,int k);
 };
 
 #endif // KDTREE_H

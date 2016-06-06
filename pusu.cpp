@@ -8,7 +8,7 @@
 using namespace std;
 
 const int point_num = 20000000;
-const double threshold = 10000.0;
+const double threshold = 10.0;
 FILE* file;
 string filename[3];
 Point** points;
@@ -19,6 +19,50 @@ int path_cnt = 0;
 int edge_cnt = 0; 
 const double max_int = 1000000000000;
 
+
+
+vector<int> findsimpath_pusu(Path* path)
+{
+	vector<int> res;
+	res.clear();
+	map<int, bool> candidate[2];
+	candidate[0].clear();
+	int cindex = 0;
+	for (int i = 0; i < path_cnt; i++)
+	{
+		candidate[cindex][i] = true;
+	}
+	Point* p = path->start;
+//	cout << "ok" <<endl;
+	while (p != NULL)
+	{
+		candidate[cindex ^ 1].clear();
+		int path_index;
+		for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		{
+			path_index = it->first;
+			Point* pp = paths[path_index]->start;
+			bool flag = false;
+//			cout << path_index << " " << pp->edge <<endl;
+			while (pp->next_point != NULL)
+			{
+//				cout << path_index << " " << point2seg(p, pp->edge) << endl;
+				if (point2seg(p, pp->edge) <= threshold)
+				{
+					flag = true;
+					break;
+				}
+				pp = pp->next_point;
+			}
+			if (flag) candidate[cindex ^ 1][path_index] = true;
+		}
+		cindex ^= 1;
+		p = p->next_point;
+	}
+	for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		res.push_back(it->first);
+	return res;
+}
 
 vector<int> findsimpath(Path* path)
 {
@@ -171,8 +215,8 @@ int main()
 				now = id;
 				path_cnt ++;
 				paths[path_cnt] = new Path(points[cnt], path_cnt);
-				if (path_cnt > 1000)
-					break;
+//				if (path_cnt > 1000)
+//					break;
 			}
 			else
 			{

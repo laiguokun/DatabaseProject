@@ -51,7 +51,11 @@ void findallsimpath()
 	vector<int> resultset;
 	for (int i = 0; i < path_cnt; i++)
 	{
+		clock_t start, finish;
+		start = clock();
 		resultset = findsimpath(paths[i]);
+		finish = clock();
+		cout << i << " " << resultset.size() << " " << double(finish - start)/((clock_t)1000) << endl;
 	}
 }
 int main()
@@ -76,6 +80,13 @@ int main()
 			points[cnt]->lng = lng;
 			if (id != now)
 			{
+				if (cnt != 0) 
+				{
+					points[cnt - 1]->edge = NULL;
+					points[cnt - 1]->next_point = NULL;
+					paths[path_cnt]->end = points[cnt - 1];
+				}
+				points[cnt]->prev_point = NULL;
 				now = id;
 				paths[path_cnt] = new Path(points[cnt], path_cnt);
 				path_cnt ++;
@@ -87,6 +98,7 @@ int main()
 				points[cnt - 1]->next_point = points[cnt];
 				edges[edge_cnt] = new Edge(points[cnt - 1], points[cnt], path_cnt);
 				points[cnt - 1]->edge = edges[edge_cnt];
+				points[cnt]->prev_point = points[cnt-1];
 				edge_cnt ++;
 			}
 			points[cnt]->path_index = path_cnt;
