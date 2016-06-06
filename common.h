@@ -1,7 +1,7 @@
 #include <cmath> 
 #include <cstdlib>
 #define pi 3.14159265358979323846
-#define earthRadiusKm 6371.0
+#define earthRadiusm 6371000.0
 
 using namespace std;
 
@@ -13,6 +13,7 @@ struct Point
   double lng;
   int path_index;
   Point* next_point = NULL;
+  Point* prev_point = NULL;
   Edge* edge = NULL;
   Point()
   {
@@ -61,6 +62,7 @@ struct Edge
 struct Path
 {
   Point* start;
+  Point* end;
   int path_index;
   Path(Point* s, int index)
   {
@@ -97,7 +99,7 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d)
   lon2r = deg2rad(lon2d);
   u = sin((lat2r - lat1r)/2);
   v = sin((lon2r - lon1r)/2);
-  return 2.0 * earthRadiusKm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+  return 2.0 * earthRadiusm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
 inline double sqr(double x)
@@ -113,6 +115,7 @@ inline double point2point(Point* p1, Point* p2) //the distance between point and
 
 double point2seg(Point* point, Edge* edge) //the distance between point and segment
 {
+  if (edge == NULL) return 10000000000;
   double x0 = point->lat, y0 = point->lng;
   double A = edge->A, B = edge->B, C = edge->C;
   Point* p = new Point;

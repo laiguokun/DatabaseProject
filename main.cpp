@@ -3,9 +3,10 @@
 #include <cstdio>
 #include "common.h"
 #include <vector>
+#include <map>
 using namespace std;
 
-const int point_num = 20000000;
+const int point_num = 12000000;
 FILE* file;
 string filename[3];
 Point** points;
@@ -33,10 +34,9 @@ vector<int> findsimpath(Path* path)
 	while (p->next_point != NULL)
 	{
 		candidate[cindex ^ 1].clear();
-		get_candidate(&candidate_set, &candidate_size);
+//		get_candidate(&candidate_set, &candidate_size);
 		for (int i = 0; i < candidate_size; i ++)
 		{
-			path_index = 
 		}
 		cindex ^= 1;
 		p = p->next_point;
@@ -56,7 +56,6 @@ void findallsimpath()
 }
 int main()
 {
-	candidate_set = new Edge*[pointsum];
 	filename[0] = "data/data1.txt";
 	filename[1] = "data/data2.txt";
 	filename[2] = "data/data3.txt";
@@ -80,8 +79,8 @@ int main()
 				now = id;
 				paths[path_cnt] = new Path(points[cnt], path_cnt);
 				path_cnt ++;
-				if (path_cnt > 100)
-					break;
+//				if (path_cnt > 100)
+//					break;
 			}
 			else
 			{
@@ -94,7 +93,20 @@ int main()
 			cnt ++;
 		}
 		cout << cnt << " " << path_cnt << endl;
-		break;
+//		break;
 	} 
-	findallsimpath();
+//	findallsimpath();
+	double avg = 0;
+	double dmin = 1000000;
+	double dmax = -dmin;
+	double dis = 0;
+	for (int i = 0; i < edge_cnt; i++)
+	{
+		dis = point2point(edges[i]->start, edges[i]->end);
+		avg += dis;
+		dmin = min(dmin,dis);
+		dmax = max(dmax,dis);
+	}
+	avg = avg/edge_cnt;
+	cout << avg << " " << dmin << " " << dmax << endl;
 }
