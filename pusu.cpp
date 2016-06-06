@@ -16,7 +16,8 @@ Edge** edges;
 Path** paths;
 int cnt = 0;
 int path_cnt = 0;
-int edge_cnt = 0;
+int edge_cnt = 0; 
+const double max_int = 1000000000000;
 
 
 vector<int> findsimpath(Path* path)
@@ -38,14 +39,16 @@ vector<int> findsimpath(Path* path)
 		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
 		{
 			path_index = it->first;
+//			cout << it ->first<< endl;
 			Point* next = it->second;
 			Point* prev = it->second->prev_point;
+			double dis_next, dis_prev;
+			if (prev == NULL) dis_prev = max_int;
+			else dis_prev = point2seg(p, prev->edge);
+			dis_next = point2seg(p, next->edge);
 			Point* now = NULL;
-			double dis_next = point2seg(p, next->edge);
-			double dis_prev = point2seg(p, prev->edge);
 			double tmp = 0;
 			bool flag = false;
-			cout << "yes" <<endl;
 			while (next != NULL or prev != NULL)
 			{
 				if (dis_next < dis_prev)
@@ -53,15 +56,16 @@ vector<int> findsimpath(Path* path)
 					tmp = dis_next;
 					now = next;
 					next = next->next_point;
-					dis_next = point2seg(p, next->edge);
+					if (next == NULL) dis_next = max_int;
+					else dis_next = point2seg(p, next->edge);
 				}
 				else
 				{
 					tmp = dis_prev;
 					now = prev;
 					prev = prev->prev_point;
-					dis_next = point2seg(p, prev->edge);
-
+					if (prev == NULL) dis_prev = max_int;
+					else dis_prev = point2seg(p, prev->edge);
 				}
 				if (tmp <= threshold)
 				{
@@ -69,8 +73,7 @@ vector<int> findsimpath(Path* path)
 					break;
 				}
 			}
-			cout << tmp <<endl;
-			if (point2point(p, prev) <= threshold) flag = true;
+//			cout << tmp <<endl;
 			if (flag) candidate[cindex ^ 1][path_index] = now;
 		}
 		cindex ^= 1;
@@ -97,7 +100,7 @@ void findallsimpath()
 			cout << j << endl;
 		}*/
 		cout << i << " " << resultset.size() << " " << double(finish - start)/((clock_t)1000) << endl;
-		break;
+//		break;
 	}
 }
 
