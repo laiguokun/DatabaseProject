@@ -1,8 +1,9 @@
 #ifndef KDTREE_H
 #define KDTREE_H
+
 #include "common.h"
-#include "object.h"
-class kdtree
+
+class Kdtree
 {
 public:
     struct Node
@@ -10,12 +11,12 @@ public:
         Node* lch;
         Node* rch;
         int k;//分割坐标
-        Edge* box;
+        double min_lat, min_lng, max_lat, max_lng;
         int n;
         int l,r;
     };
     Edge** edges;
-    kdtree(Edge**, int);
+    Kdtree(Edge**, int);
     void find(Node* node, double xmin, double xmax, double ymin, double ymax, int** kd_set, int* cnt);
     Node* root;
     int* index;

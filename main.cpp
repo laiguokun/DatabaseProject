@@ -2,8 +2,10 @@
 #include <cstdlib>
 #include <cstdio>
 #include "common.h"
+#include "kdtree.h"
 #include <vector>
 #include <map>
+#include <ctime>
 using namespace std;
 
 const int point_num = 12000000;
@@ -15,6 +17,7 @@ Path** paths;
 int cnt = 0;
 int path_cnt = 0;
 int edge_cnt = 0;
+Kdtree* kdtree;
 
 Edge** candidate_set;
 int candidate_size;
@@ -88,10 +91,10 @@ int main()
 				}
 				points[cnt]->prev_point = NULL;
 				now = id;
-				paths[path_cnt] = new Path(points[cnt], path_cnt);
 				path_cnt ++;
-//				if (path_cnt > 100)
-//					break;
+				paths[path_cnt] = new Path(points[cnt], path_cnt);
+				if (path_cnt > 1000)
+					break;
 			}
 			else
 			{
@@ -105,9 +108,10 @@ int main()
 			cnt ++;
 		}
 		cout << cnt << " " << path_cnt << endl;
-//		break;
+		break;
 	} 
 //	findallsimpath();
+	/*
 	double avg = 0;
 	double dmin = 1000000;
 	double dmax = -dmin;
@@ -121,4 +125,6 @@ int main()
 	}
 	avg = avg/edge_cnt;
 	cout << avg << " " << dmin << " " << dmax << endl;
+	*/
+	kdtree = new Kdtree(edges, edge_cnt);
 }

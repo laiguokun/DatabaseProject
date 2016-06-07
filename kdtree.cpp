@@ -1,16 +1,20 @@
 #include "kdtree.h"
-#include "common.h"
+#include <iostream>
+#include <cstdlib>
+
 const double eps=1e-7;
 const double maxn = 1000000000;
-kdtree::kdtree(Edge** edges, int size)
+
+using namespace std;
+
+Kdtree::Kdtree(Edge** edges, int size)
 {
     this->edges = edges;
     root=new Node;
-    root->box = new Edge();
-    root->box->max_lat = maxn;
-    root->box->min_lat = -maxn;
-    root->box->max_lng = maxn;
-    root->box->min_lng = -maxn;
+    root->max_lat = maxn;
+    root->min_lat = -maxn;
+    root->max_lng = maxn;
+    root->min_lng = -maxn;
     root->l=0;root->r=size;
     root->k=0;
     index=new int[size];
@@ -19,9 +23,9 @@ kdtree::kdtree(Edge** edges, int size)
     double start=clock();
     buildtree(root);
     double end=clock();
-    cout<<"build:"<<end-start<<endl;
+    cout<<"build:"<<(end-start)/1000<<endl;
 }
-void kdtree::sort(int** index,int l,int r,int k)
+void Kdtree::sort(int** index,int l,int r,int k)
 {
     int i=l,j=r;
     if (k == 0)
@@ -60,7 +64,7 @@ void kdtree::sort(int** index,int l,int r,int k)
     if (l<j) sort(index,l,j,k);
 }
 
-void kdtree::buildtree(Node* node)
+void Kdtree::buildtree(Node* node)
 {
     int k=node->k;
 
@@ -91,25 +95,25 @@ void kdtree::buildtree(Node* node)
 
     for (int i=node->l;i<mid;i++)
     {
-        node->lch->max_lat=max(node->lch->max_lat,edges[index[i]]->max_lat);
-        node->lch->max_lng=max(node->lch->max_lng,edges[index[i]]->max_lng);
-        node->lch->min_lat=min(node->lch->min_lat,edges[index[i]]->min_lat);
-        node->lch->min_lng=min(node->lch->min_lng,edges[index[i]]->min_lng);
+        node->lch->max_lat=fmax(node->lch->max_lat,edges[index[i]]->max_lat);
+        node->lch->max_lng=fmax(node->lch->max_lng,edges[index[i]]->max_lng);
+        node->lch->min_lat=fmin(node->lch->min_lat,edges[index[i]]->min_lat);
+        node->lch->min_lng=fmin(node->lch->min_lng,edges[index[i]]->min_lng);
     }
 
     for (int i=mid;i<node->r;i++)
     {
-        node->rch->max_lat=max(node->rch->max_lat,edges[index[i]]->max_lat);
-        node->rch->max_lng=max(node->rch->max_lng,edges[index[i]]->max_lng);
-        node->rch->min_lat=min(node->rch->min_lat,edges[index[i]]->min_lat);
-        node->rch->min_lng=min(node->rch->min_lng,edges[index[i]]->min_lng);
+        node->rch->max_lat=fmax(node->rch->max_lat,edges[index[i]]->max_lat);
+        node->rch->max_lng=fmax(node->rch->max_lng,edges[index[i]]->max_lng);
+        node->rch->min_lat=fmin(node->rch->min_lat,edges[index[i]]->min_lat);
+        node->rch->min_lng=fmin(node->rch->min_lng,edges[index[i]]->min_lng);
     }
 
     buildtree(node->lch);
     buildtree(node->rch);
 }
 
-void kdtree::find(Node* node, double xmin, double xmax, double ymin, double ymax, int** kd_set_, int* cnt_)
+void Kdtree::find(Node* node, double xmin, double xmax, double ymin, double ymax, int** kd_set_, int* cnt_)
 {
     int* kd_set = *kd_set_;
     int cnt = *cnt_;
