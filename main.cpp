@@ -10,6 +10,7 @@ using namespace std;
 
 const int point_num = 12000000;
 const double threshold = 1.0;
+const double max_int = 1000000000000;
 FILE* file;
 string filename[3];
 Point** points;
@@ -59,72 +60,112 @@ vector<int> findsimpath(Path* path)
 	int path_index = 0;
 	double dx,dy;
 	Point* p = path->start;
+	map<int, Point*> candidate[2];
+	candidate[0].clear();
+	int tmp;
 
+	p = path->end;
 	cand_cnt = 0;
 	get_box(&dx,&dy,p);
 	kdtree->find(kdtree->root, p->lat - dx, p->lat + dx, p->lng - dy, p->lng + dy, &cand_set, &cand_cnt);
-
-	map<int, bool> candidate[2];
-	candidate[0].clear();
-	int tmp;
 	for (int i = 0; i < cand_cnt; i++)
 	{
 		tmp = edges[cand_set[i]]->path_index;
 		if (tmp != path->path_index)
-			candidate[cindex][tmp] = true;
+			candidate[cindex][tmp] = p;
+	}	
+	cindex ^= 1;
+
+	cand_cnt = 0;
+	get_box(&dx,&dy,p);
+	kdtree->find(kdtree->root, p->lat - dx, p->lat + dx, p->lng - dy, p->lng + dy, &cand_set, &cand_cnt);
+	for (int i = 0; i < cand_cnt; i++)
+	{
+		tmp = edges[cand_set[i]]->path_index;
+		if (tmp != path->path_index  && candidate[cindex^1].find(tmp) != candidate[cindex].end())
+			candidate[cindex][tmp] = edges[cand_set[i]]->start;
 	}
 
-	
-	cout << candidate[cindex].size() <<endl;
+//	cout << candidate[cindex].size() <<endl;
+
+
+	p = path->start;
 	while (p != NULL)
 	{
 		candidate[cindex ^ 1].clear();
 		int path_index;
-		for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
 		{
 			path_index = it->first;
-			Point* pp = paths[path_index]->start;
+			Point* next = it->second;
+			Point* prev = it->second->prev_point;
+			double dis_next, dis_prev;
+			if (prev == NULL) dis_prev = max_int;
+			else dis_prev = point2seg(p, prev->edge);
+			dis_next = point2seg(p, next->edge);
+			Point* now = NULL;
+			double tmp = 0;
 			bool flag = false;
-//			cout << path_index << " " << pp->edge <<endl;
-			while (pp->next_point != NULL)
+			while (next != NULL or prev != NULL)
 			{
-//				cout << path_index << " " << point2seg(p, pp->edge) << endl;
-				if (point2seg(p, pp->edge) <= threshold)
+				if (dis_next < dis_prev)
+				{
+					tmp = dis_next;
+					now = next;
+					next = next->next_point;
+					if (next == NULL) dis_next = max_int;
+					else dis_next = point2seg(p, next->edge);
+				}
+				else
+				{
+					tmp = dis_prev;
+					now = prev;
+					prev = prev->prev_point;
+					if (prev == NULL) dis_prev = max_int;
+					else dis_prev = point2seg(p, prev->edge);
+				}
+				if (tmp <= threshold)
 				{
 					flag = true;
 					break;
 				}
-				pp = pp->next_point;
 			}
-			if (flag) candidate[cindex ^ 1][path_index] = true;
+			if (flag) candidate[cindex ^ 1][path_index] = now;
 		}
 		cindex ^= 1;
 		p = p->next_point;
 	}
-	for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+	for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
 		res.push_back(it->first);
 	return res;
 }
 
 void findallsimpath()
 {
+	FILE* output = fopen("allsim-1km.txt", "w");
 	vector<int> resultset;
+	clock_t all_start, all_finish;
+	all_start = clock();
 	for (int i = 0; i < path_cnt; i++)
 	{
 		clock_t start, finish;
 		start = clock();
 		resultset = findsimpath(paths[i]);
 		finish = clock();
-/*		for (int j = 0; j < resultset.size(); j++)
+		for (int j = 0; j < resultset.size(); j++)
 		{
-//			fprintf(output, "%d %d\n", i, resultset[j]);
-			cout << i << " " << resultset[j] << endl;
-		}*/
+			fprintf(output, "%d %d\n", i, resultset[j]);
+		}
 		cout << i << " " << resultset.size() << " " << double(finish - start)/((clock_t)1000) << endl;
 	}
+	all_finish = clock();
+	fprintf(output, "%f\n", double((all_finish - all_start))/((clock_t)1000));
+	cout << double(all_finish - all_start)/((clock_t)1000) << endl;
 }
+
 int main()
 {
+
 	filename[0] = "data/data1.txt";
 //	filename[0] = "data/test.txt";
 	filename[1] = "data/data2.txt";
@@ -172,7 +213,7 @@ int main()
 			cnt ++;
 		}
 		cout << cnt << " " << path_cnt << " " << edge_cnt << endl;
-		break;
+//		break;
 	} 
 	/*
 	double avg = 0;

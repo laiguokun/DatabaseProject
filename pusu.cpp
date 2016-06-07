@@ -136,13 +136,12 @@ void findallsimpath()
 	{
 		clock_t start, finish;
 		start = clock();
-		resultset = findsimpath_pusu(paths[i]);
+		resultset = findsimpath(paths[i]);
 		finish = clock();
-/*		for (int j = 0; j < resultset.size(); j++)
+		for (int j = 0; j < resultset.size(); j++)
 		{
 			fprintf(output, "%d %d\n", i, resultset[j]);
-			cout << j << endl;
-		}*/
+		}
 		cout << i << " " << resultset.size() << " " << double(finish - start)/((clock_t)1000) << endl;
 //		break;
 	}
@@ -230,7 +229,6 @@ int main()
 			cnt ++;
 		}
 		cout << cnt << " " << path_cnt << endl;
-		break;
 	} 
 //	shuffleallpath();
 	findallsimpath();
