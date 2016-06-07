@@ -92,7 +92,7 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d);
 
 inline double sqr(double x);
 
-inline double point2point(Point* p1, Point* p2); //the distance between point and point
+double point2point(Point* p1, Point* p2); //the distance between point and point
 
 double point2seg(Point* point, Edge* edge); //the distance between point and segment
 

@@ -8,7 +8,7 @@
 using namespace std;
 
 const int point_num = 20000000;
-const double threshold = 10.0;
+const double threshold = 1.0;
 FILE* file;
 string filename[3];
 Point** points;
@@ -136,7 +136,7 @@ void findallsimpath()
 	{
 		clock_t start, finish;
 		start = clock();
-		resultset = findsimpath(paths[i]);
+		resultset = findsimpath_pusu(paths[i]);
 		finish = clock();
 /*		for (int j = 0; j < resultset.size(); j++)
 		{

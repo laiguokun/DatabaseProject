@@ -115,14 +115,12 @@ void Kdtree::buildtree(Node* node)
 
 void Kdtree::find(Node* node, double xmin, double xmax, double ymin, double ymax, int** kd_set_, int* cnt_)
 {
-    int* kd_set = *kd_set_;
-    int cnt = *cnt_;
     if (node->min_lat > xmin && node->min_lng > ymin && node->max_lat < xmax && node->max_lng < ymax)
     {
         for (int i = node->l; i < node->r; i++)
         {
-            kd_set[cnt] = index[i];
-            cnt ++;
+            (*kd_set_)[(*cnt_)] = index[i];
+            (*cnt_) ++;
         }
         return;
     }
@@ -130,6 +128,12 @@ void Kdtree::find(Node* node, double xmin, double xmax, double ymin, double ymax
     if (node->min_lat > xmax or node->min_lng > ymax or node->max_lat < xmin or node->max_lng < ymin)
         return;
 
+    if (node->r - node->l == 1)
+    {
+        (*kd_set_)[(*cnt_)] = index[node->l];
+        (*cnt_) ++;
+        return;
+    }
     find(node->lch, xmin, xmax, ymin, ymax, kd_set_, cnt_);
     find(node->rch, xmin, xmax, ymin, ymax, kd_set_, cnt_);
 }
