@@ -22,6 +22,7 @@ struct Point
     next_point = NULL;
     edge = NULL;
   }
+  ~Point(){}
 };
 
 struct Edge
@@ -59,6 +60,7 @@ struct Edge
 //    cout << A << " " << B << " " << C << " " <<start->lat<<endl;
     path_index = index;
   }
+  ~Edge(){}
 };
 
 struct Path
@@ -71,6 +73,7 @@ struct Path
     start = s;
     path_index = index;
   }
+  ~Path(){}
 };
 
 // This function converts decimal degrees to radians

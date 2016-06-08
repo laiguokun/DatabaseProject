@@ -18,30 +18,35 @@ int cnt = 0;
 int path_cnt = 0;
 int edge_cnt = 0; 
 const double max_int = 1000000000000;
-
-
+//map<int, Point*> candidate[2];
+Point*** candidate = new Point**[2];
+int** pusu_c = new int*[2];
+int c_cnt[2];
 
 vector<int> findsimpath_pusu(Path* path)
 {
 	vector<int> res;
 	res.clear();
-	map<int, bool> candidate[2];
-	candidate[0].clear();
+	c_cnt[0] = 0;c_cnt[1] = 0;
 	int cindex = 0;
 	for (int i = 0; i < path_cnt; i++)
 	{
 		if (i != path->path_index)
-			candidate[cindex][i] = true;
+		{
+			pusu_c[cindex][c_cnt[cindex]] = i;
+			c_cnt[cindex] ++;
+		}
 	}
 	Point* p = path->start;
 //	cout << "ok" <<endl;
 	while (p != NULL)
 	{
-		candidate[cindex ^ 1].clear();
+		c_cnt[cindex ^ 1] = 0;
 		int path_index;
-		for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+//		for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		for (int i = 0; i < c_cnt[cindex]; i++)
 		{
-			path_index = it->first;
+			path_index = pusu_c[cindex][i];
 			Point* pp = paths[path_index]->start;
 			bool flag = false;
 //			cout << path_index << " " << pp->edge <<endl;
@@ -55,13 +60,17 @@ vector<int> findsimpath_pusu(Path* path)
 				}
 				pp = pp->next_point;
 			}
-			if (flag) candidate[cindex ^ 1][path_index] = true;
+			if (flag) 
+			{
+				pusu_c[cindex ^ 1][c_cnt[cindex ^ 1]] = path_index;
+				c_cnt[cindex ^ 1] ++;
+			}
 		}
 		cindex ^= 1;
 		p = p->next_point;
 	}
-	for (map<int, bool>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
-		res.push_back(it->first);
+	for (int i = 0; i < c_cnt[cindex]; i++)
+		res.push_back(pusu_c[cindex][i]);
 	return res;
 }
 
@@ -69,23 +78,27 @@ vector<int> findsimpath(Path* path)
 {
 	vector<int> res;
 	res.clear();
-	map<int, Point*> candidate[2];
 	int cindex = 0;
+	c_cnt[0] = 0;c_cnt[1] = 0;
 	for (int i = 0; i < path_cnt; i++)
 	{
 		if (i != path->path_index)
-			candidate[cindex][i] = paths[i]->start;
+		{
+			candidate[cindex][c_cnt[cindex]] = paths[i]->start;
+			c_cnt[cindex] ++;
+		}
 	}
 	Point* p = path->start;
 	while (p != NULL)
 	{
-		candidate[cindex^1].clear();
+		c_cnt[cindex ^ 1] = 0;
 		int path_index;
-		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+//		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		for (int i = 0; i < c_cnt[cindex]; i++)
 		{
-			path_index = it->first;
-			Point* next = it->second;
-			Point* prev = it->second->prev_point;
+			path_index = candidate[cindex][i]->path_index;
+			Point* next = candidate[cindex][i];
+			Point* prev = candidate[cindex][i]->prev_point;
 			double dis_next, dis_prev;
 			if (prev == NULL) dis_prev = max_int;
 			else dis_prev = point2seg(p, prev->edge);
@@ -117,27 +130,32 @@ vector<int> findsimpath(Path* path)
 					break;
 				}
 			}
-			if (flag) candidate[cindex ^ 1][path_index] = now;
+			if (flag) 
+			{
+				candidate[cindex ^ 1][c_cnt[cindex ^ 1]] = now;
+				c_cnt[cindex ^ 1] ++;
+			}
 		}
 		cindex ^= 1;
 		p = p->next_point;
-		//clean map
-		candidate[cindex^1].erase(candidate[cindex^1].begin(), candidate[cindex^1].end());
 	}
-	for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
-		res.push_back(it->first);
+//	for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+	for (int i = 0; i < c_cnt[cindex]; i++)
+		res.push_back(candidate[cindex][i]->path_index);
 	return res;
 }
 
 void findallsimpath()
 {
 	vector<int> resultset;
-	FILE* output = fopen("allsim-1km-near.txt", "w");
-	for (int i = 0; i < path_cnt; i++)
+	FILE* output = fopen("allsim-1km-pusu.txt", "w");
+	clock_t all_start, all_finish;
+	all_start = clock();
+	for (int i = 0; i < 200; i++)
 	{
 		clock_t start, finish;
 		start = clock();
-		resultset = findsimpath(paths[i]);
+		resultset = findsimpath_pusu(paths[i]);
 		finish = clock();
 		for (int j = 0; j < resultset.size(); j++)
 		{
@@ -146,6 +164,9 @@ void findallsimpath()
 		cout << i << " " << resultset.size() << " " << double(finish - start)/((clock_t)1000) << endl;
 //		break;
 	}
+	all_finish = clock();
+	fprintf(output, "%f\n", double((all_finish - all_start))/((clock_t)1000));
+	cout << double(all_finish - all_start)/((clock_t)1000) << endl;
 }
 
 void shuffleallpath()
@@ -183,6 +204,10 @@ void shuffleallpath()
 
 int main()
 {
+	candidate[0] = new Point*[100000];
+	candidate[1] = new Point*[100000];
+	pusu_c[0] = new int[100000];
+	pusu_c[1] = new int[100000];
 	filename[0] = "data/data1.txt";
 //	filename[0] = "data/test.txt";
 	filename[1] = "data/data2.txt";
@@ -215,8 +240,6 @@ int main()
 				now = id;
 				path_cnt ++;
 				paths[path_cnt] = new Path(points[cnt], path_cnt);
-//				if (path_cnt > 1000)
-//					break;
 			}
 			else
 			{

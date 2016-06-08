@@ -53,13 +53,17 @@ double point2seg(Point* point, Edge* edge) //the distance between point and segm
   if (edge == NULL) return 10000000000;
   double x0 = point->lat, y0 = point->lng;
   double A = edge->A, B = edge->B, C = edge->C;
+  double res;
   Point* p = new Point;
   p->lat = (B*B*x0 - A*B*y0 - A*C); p->lng = (-A*B*x0 + A*A*y0 - B*C); //the coordinate of the intersection point
 //      cout << A << " " << B << " " << C << " " << x0 << " " << y0 << " " << p->lat << " " << p->lng << " " << point2point(point,p)<<endl;
 //      cout << point2point(point, edge->start) << " " << point2point(point,edge->end) << endl;
   if (p->lat >= edge->min_lat && p->lat <= edge->max_lat && p->lng >= edge->min_lng && p->lng <= edge->max_lng)
-    return point2point(point, p);
-  return min(point2point(point, edge->start), point2point(point, edge->end));
+    res = point2point(point, p);
+  else
+    res = min(point2point(point, edge->start), point2point(point, edge->end));
+  delete p;
+  return res;
 }
 
 

@@ -26,6 +26,9 @@ int cand_cnt;
 Edge** candidate_set;
 int candidate_size;
 
+Point*** candidate = new Point**[2];
+int c_cnt[2];
+
 void get_box(double* dx_, double* dy_, Point* p)
 {
 	double h = 0, t = threshold * 1000, mid;
@@ -50,6 +53,7 @@ void get_box(double* dx_, double* dy_, Point* p)
 		else h = mid;
 	}
 	*dy_ = h;
+	delete tmp;
 }
 
 vector<int> findsimpath(Path* path)
@@ -59,46 +63,67 @@ vector<int> findsimpath(Path* path)
 	int cindex = 0;
 	int path_index = 0;
 	double dx,dy;
-	Point* p = path->start;
-	map<int, Point*> candidate[2];
-	candidate[0].clear();
+	Point* p;
+	map<int, Point*> tmp_map[2];
+	map<int, double> tmp_dis;
+	tmp_map[0].clear();
 	int tmp;
 
 	p = path->end;
 	cand_cnt = 0;
 	get_box(&dx,&dy,p);
 	kdtree->find(kdtree->root, p->lat - dx, p->lat + dx, p->lng - dy, p->lng + dy, &cand_set, &cand_cnt);
+
 	for (int i = 0; i < cand_cnt; i++)
 	{
 		tmp = edges[cand_set[i]]->path_index;
 		if (tmp != path->path_index)
-			candidate[cindex][tmp] = p;
+			tmp_map[0][tmp] = p;
 	}	
-	cindex ^= 1;
 
+	p = path->start;
 	cand_cnt = 0;
 	get_box(&dx,&dy,p);
 	kdtree->find(kdtree->root, p->lat - dx, p->lat + dx, p->lng - dy, p->lng + dy, &cand_set, &cand_cnt);
 	for (int i = 0; i < cand_cnt; i++)
 	{
 		tmp = edges[cand_set[i]]->path_index;
-		if (tmp != path->path_index  && candidate[cindex^1].find(tmp) != candidate[cindex].end())
-			candidate[cindex][tmp] = edges[cand_set[i]]->start;
+		if (tmp != path->path_index  && tmp_map[0].find(tmp) != tmp_map[0].end())
+		{
+/*			if (tmp_map[1].find(tmp) != tmp_map[1].end())
+			{
+				if (tmp_dis[tmp] > point2seg(p, edges[cand_set[i]]->start))
+					tmp_map[1][tmp] = edges[cand_set[i]]->start;
+			}
+			else*/
+			{
+				tmp_map[1][tmp] = edges[cand_set[i]]->start;
+//				tmp_dis[tmp] = point2seg(point, edges[cand_set[i]]->start);
+			}
+		}
 	}
 
+	c_cnt[0] = 0;c_cnt[1] = 0;
+
+	for (map<int, Point*>::iterator it = tmp_map[1].begin(); it != tmp_map[1].end(); it ++)
+	{
+		candidate[cindex][c_cnt[cindex]] = it->second;
+		c_cnt[cindex] ++;
+	}
 //	cout << candidate[cindex].size() <<endl;
 
 
 	p = path->start;
 	while (p != NULL)
 	{
-		candidate[cindex ^ 1].clear();
+		c_cnt[cindex ^ 1] = 0;
 		int path_index;
-		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+//		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
+		for (int i = 0; i < c_cnt[cindex]; i++)
 		{
-			path_index = it->first;
-			Point* next = it->second;
-			Point* prev = it->second->prev_point;
+			path_index = candidate[cindex][i]->path_index;
+			Point* next = candidate[cindex][i];
+			Point* prev = candidate[cindex][i]->prev_point;
 			double dis_next, dis_prev;
 			if (prev == NULL) dis_prev = max_int;
 			else dis_prev = point2seg(p, prev->edge);
@@ -130,13 +155,17 @@ vector<int> findsimpath(Path* path)
 					break;
 				}
 			}
-			if (flag) candidate[cindex ^ 1][path_index] = now;
+			if (flag) 
+			{
+				candidate[cindex ^ 1][c_cnt[cindex ^ 1]] = now;
+				c_cnt[cindex ^ 1] ++;
+			}
 		}
 		cindex ^= 1;
 		p = p->next_point;
 	}
-	for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
-		res.push_back(it->first);
+	for (int i = 0; i < c_cnt[cindex]; i++)
+		res.push_back(candidate[cindex][i]->path_index);
 	return res;
 }
 
@@ -146,7 +175,7 @@ void findallsimpath()
 	vector<int> resultset;
 	clock_t all_start, all_finish;
 	all_start = clock();
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 200; i++)
 	{
 		clock_t start, finish;
 		start = clock();
@@ -165,7 +194,8 @@ void findallsimpath()
 
 int main()
 {
-
+	candidate[0] = new Point*[100000];
+	candidate[1] = new Point*[100000];
 	filename[0] = "data/data1.txt";
 //	filename[0] = "data/test.txt";
 	filename[1] = "data/data2.txt";
