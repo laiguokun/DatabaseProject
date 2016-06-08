@@ -7,7 +7,7 @@
 #include <ctime>
 using namespace std;
 
-const int point_num = 20000000;
+const int point_num = 12000000;
 const double threshold = 1.0;
 FILE* file;
 string filename[3];
@@ -30,7 +30,8 @@ vector<int> findsimpath_pusu(Path* path)
 	int cindex = 0;
 	for (int i = 0; i < path_cnt; i++)
 	{
-		candidate[cindex][i] = true;
+		if (i != path->path_index)
+			candidate[cindex][i] = true;
 	}
 	Point* p = path->start;
 //	cout << "ok" <<endl;
@@ -69,21 +70,20 @@ vector<int> findsimpath(Path* path)
 	vector<int> res;
 	res.clear();
 	map<int, Point*> candidate[2];
-	candidate[0].clear();
 	int cindex = 0;
 	for (int i = 0; i < path_cnt; i++)
 	{
-		candidate[cindex][i] = paths[i]->start;
+		if (i != path->path_index)
+			candidate[cindex][i] = paths[i]->start;
 	}
 	Point* p = path->start;
 	while (p != NULL)
 	{
-		candidate[cindex ^ 1].clear();
+		candidate[cindex^1].clear();
 		int path_index;
 		for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
 		{
 			path_index = it->first;
-//			cout << it ->first<< endl;
 			Point* next = it->second;
 			Point* prev = it->second->prev_point;
 			double dis_next, dis_prev;
@@ -117,11 +117,12 @@ vector<int> findsimpath(Path* path)
 					break;
 				}
 			}
-//			cout << tmp <<endl;
 			if (flag) candidate[cindex ^ 1][path_index] = now;
 		}
 		cindex ^= 1;
 		p = p->next_point;
+		//clean map
+		candidate[cindex^1].erase(candidate[cindex^1].begin(), candidate[cindex^1].end());
 	}
 	for (map<int, Point*>::iterator it = candidate[cindex].begin(); it != candidate[cindex].end(); it ++)
 		res.push_back(it->first);
@@ -131,7 +132,7 @@ vector<int> findsimpath(Path* path)
 void findallsimpath()
 {
 	vector<int> resultset;
-	FILE* output = fopen("allsim.txt", "w");
+	FILE* output = fopen("allsim-1km-near.txt", "w");
 	for (int i = 0; i < path_cnt; i++)
 	{
 		clock_t start, finish;

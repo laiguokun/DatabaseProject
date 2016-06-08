@@ -146,7 +146,7 @@ void findallsimpath()
 	vector<int> resultset;
 	clock_t all_start, all_finish;
 	all_start = clock();
-	for (int i = 0; i < path_cnt; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		clock_t start, finish;
 		start = clock();
