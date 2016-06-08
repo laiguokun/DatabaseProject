@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99992 (TeX Live 2015) (preloaded format=xelatex 2016.5.10)  8 JUN 2016 16:51
+This is XeTeX, Version 3.14159265-2.6-0.99992 (TeX Live 2015) (preloaded format=xelatex 2016.5.10)  8 JUN 2016 17:09
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -966,14 +966,16 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 [1
 
-] [2] (./sample.aux) ) 
+]
+File: example.png Graphic file (type QTm)
+ <use  "example.png" > [2] [3] (./sample.aux) ) 
 Here is how much of TeX's memory you used:
- 18584 strings out of 493632
- 368182 string characters out of 6144722
+ 18588 strings out of 493632
+ 368211 string characters out of 6144722
  367473 words of memory out of 5000000
- 21913 multiletter control sequences out of 15000+600000
+ 21914 multiletter control sequences out of 15000+600000
  6528 words of font info for 42 fonts, out of 8000000 for 9000
  1328 hyphenation exceptions out of 8191
  54i,6n,64p,10440b,235s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on sample.pdf (2 pages).
+Output written on sample.pdf (3 pages).

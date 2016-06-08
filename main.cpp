@@ -90,15 +90,15 @@ vector<int> findsimpath(Path* path)
 		tmp = edges[cand_set[i]]->path_index;
 		if (tmp != path->path_index  && tmp_map[0].find(tmp) != tmp_map[0].end())
 		{
-/*			if (tmp_map[1].find(tmp) != tmp_map[1].end())
+			if (tmp_map[1].find(tmp) != tmp_map[1].end())
 			{
-				if (tmp_dis[tmp] > point2seg(p, edges[cand_set[i]]->start))
+				if (tmp_dis[tmp] > point2seg(p, edges[cand_set[i]]))
 					tmp_map[1][tmp] = edges[cand_set[i]]->start;
 			}
-			else*/
+			else
 			{
 				tmp_map[1][tmp] = edges[cand_set[i]]->start;
-//				tmp_dis[tmp] = point2seg(point, edges[cand_set[i]]->start);
+				tmp_dis[tmp] = point2seg(p, edges[cand_set[i]]);
 			}
 		}
 	}
